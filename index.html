@@ -63,6 +63,8 @@ input.err,textarea.err{border-color:#c0392b;box-shadow:0 0 0 3px rgba(192,57,43,
 .q .num{font-family:'Cormorant Garamond',serif;font-weight:700;color:var(--rust);
   font-size:20px;min-width:26px;text-align:right;flex:none}
 .q .qtext{color:var(--dark);font-size:18px;line-height:1.45}
+.q .qhint{margin-left:38px;margin-top:-2px;margin-bottom:7px;color:var(--muted);
+  opacity:.55;font-style:italic;font-size:14px}
 .q textarea{margin-left:38px;width:calc(100% - 38px)}
 
 .footer-note{color:var(--muted);font-size:14px;margin-top:34px;line-height:1.6}
@@ -100,6 +102,7 @@ button.send:disabled{background:#c8a58f;cursor:default;box-shadow:none}
   body{padding:0 14px 150px}
   .card{padding:20px 16px}
   .q textarea{margin-left:0;width:100%}
+  .q .qhint{margin-left:0}
   .q .qhead{margin-bottom:6px}
 }
 </style>
@@ -120,11 +123,7 @@ button.send:disabled{background:#c8a58f;cursor:default;box-shadow:none}
     <div class="hint">Чтобы было понятно, чьи это воспоминания.</div>
     <div class="field">
       <label>Как вас зовут? <span class="req">*</span></label>
-      <input type="text" id="who-name" placeholder="Например: Валентина Петровна">
-    </div>
-    <div class="field">
-      <label>Кем вы приходитесь?</label>
-      <input type="text" id="who-rel" placeholder="Мама, папа, бабушка, дедушка…">
+      <input type="text" id="who-name" placeholder="Например: Мария Ивановна Петрова">
     </div>
   </div>
 
@@ -170,29 +169,29 @@ const SECTIONS = [
     "Какие книги, сказки, фильмы или герои были важны для тебя?",
     "Был ли у тебя лучший друг детства? Что вас связывало?"]],
   ["II","Взросление",[
-    "Чем ты занимался после школы: кружки, секции, хобби?",
+    ["Чем ты занимался после школы: кружки, секции, хобби?","если ещё учишься — расскажи про то, чем занимаешься сейчас"],
     "Какие обязанности были у тебя дома?",
     "Чего ты боялся в детстве и как справлялся?",
     "Каким достижением из детства ты гордишься?",
     "Нравилось ли тебе в школе? Какие предметы или учителя запомнились?",
     "Что в твоём детстве было такого, чего уже нет у сегодняшних детей?",
-    "Как изменился мир с тех пор? В каком времени тебе проще жить — тогда или сейчас?"]],
+    ["Как изменился мир с тех пор? В каком времени тебе проще жить — тогда или сейчас?","пропусти, если тебе это пока рано"]]],
   ["III","Родители и корни",[
     "Какими были твои родители для тебя в детстве и какими ты видишь их сейчас?",
     "Какие советы родителей оказались правдой и помогли в жизни?",
     "Что ты помнишь о своих бабушках и дедушках?",
     "Есть ли семейные истории, которые нельзя потерять?"]],
   ["IV","Любовь и семья",[
-    "Как ты познакомился со своим партнёром? Что запомнилось в начале отношений?",
+    ["Как ты познакомился со своим партнёром? Что запомнилось в начале отношений?","пропусти, если пока нет второй половинки"],
     "Что для тебя значит хорошая семья?",
-    "Как изменилась жизнь с появлением детей?",
-    "Что оказалось самым радостным и самым трудным в родительстве?",
+    ["Как изменилась жизнь с появлением детей?","пропусти, если пока нет детей"],
+    ["Что оказалось самым радостным и самым трудным в родительстве?","пропусти, если пока нет детей"],
     "Что бы ты хотел сказать детям, внукам или младшим в семье?"]],
   ["V","Дело и призвание",[
     "Кем ты мечтал стать в детстве?",
-    "Как ты выбрал профессию? Что в ней оказалось твоим?",
-    "Какая была первая работа и чему она научила?",
-    "На что ушла первая зарплата или первая важная покупка?"]],
+    ["Как ты выбрал профессию? Что в ней оказалось твоим?","пропусти, если ещё выбираешь свой путь"],
+    ["Какая была первая работа и чему она научила?","пропусти, если ещё не работал(а)"],
+    ["На что ушла первая зарплата или первая важная покупка?","пропусти, если ещё не было своей зарплаты"]]],
   ["VI","Характер и ценности",[
     "В чём твоя сила? В чём слабость?",
     "Какие качества в людях ты ценишь, а какие не принимаешь?",
@@ -222,13 +221,16 @@ SECTIONS.forEach(([rom,title,qs])=>{
   head.className='section-head';
   head.innerHTML=`<span class="rom">${rom}</span><span class="stitle">${title}</span>`;
   sectionsEl.appendChild(head);
-  qs.forEach(q=>{
+  qs.forEach(item=>{
     n++;
     const idx = n;
+    const q = Array.isArray(item)?item[0]:item;
+    const hint = Array.isArray(item)?item[1]:'';
     const wrap=document.createElement('div');
     wrap.className='q';
     wrap.innerHTML=`<div class="qhead"><span class="num">${idx}</span><span class="qtext"></span></div>`;
     wrap.querySelector('.qtext').textContent=q;
+    if(hint){const h=document.createElement('div');h.className='qhint';h.textContent=hint;wrap.appendChild(h);}
     const ta=document.createElement('textarea');
     ta.id='q'+idx;
     ta.placeholder='Ваш ответ…';
@@ -248,7 +250,7 @@ function autoGrow(ta){ta.style.height='auto';ta.style.height=(ta.scrollHeight+2)
 let saveTimer=null;
 function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(save,500);}
 function save(){
-  const data={name:val('who-name'),rel:val('who-rel'),answers:{}};
+  const data={name:val('who-name'),answers:{}};
   flatQuestions.forEach(f=>{if(f.el.value.trim())data.answers[f.idx]=f.el.value;});
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));showSaved();}catch(e){}
 }
@@ -257,11 +259,10 @@ function load(){
   let d;try{d=JSON.parse(localStorage.getItem(STORAGE_KEY));}catch(e){return;}
   if(!d)return;
   if(d.name)document.getElementById('who-name').value=d.name;
-  if(d.rel)document.getElementById('who-rel').value=d.rel;
   if(d.answers)flatQuestions.forEach(f=>{if(d.answers[f.idx]){f.el.value=d.answers[f.idx];autoGrow(f.el);}});
 }
 function val(id){return document.getElementById(id).value.trim();}
-['who-name','who-rel'].forEach(id=>document.getElementById(id).addEventListener('input',scheduleSave));
+document.getElementById('who-name').addEventListener('input',scheduleSave);
 
 function updateProgress(){
   const c=flatQuestions.filter(f=>f.el.value.trim()).length;
@@ -273,11 +274,11 @@ function updateProgress(){
 function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function buildMessages(){
-  const name=val('who-name'), rel=val('who-rel');
+  const name=val('who-name');
   const now=new Date().toLocaleString('ru-RU',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
   const answered=flatQuestions.filter(f=>f.el.value.trim());
   const head=[`<b>📖 Семейный архив — новые ответы</b>`,
-    `👤 <b>${esc(name)}</b>${rel?' — '+esc(rel):''}`,
+    `👤 <b>${esc(name)}</b>`,
     `🕐 ${esc(now)}`,
     `✍️ Отвечено: ${answered.length} из ${TOTAL}`].join('\n');
   // группируем по разделам

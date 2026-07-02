@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Семейный архив — вопросы близким</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=Spectral:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4ecdb; --card:#fbf6ec; --dark:#33291d; --rust:#b0532f;
+  --qtext:#4c4133; --line:#d8c9ad; --line2:#c9b48c; --muted:#908066;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg); color:var(--qtext);
+  font-family:'Spectral',Georgia,serif; font-size:17px; line-height:1.6;
+  padding:0 20px 140px;
+}
+.wrap{max-width:760px;margin:0 auto}
+header{padding:60px 0 10px;text-align:left}
+h1{font-family:'Cormorant Garamond',serif;font-weight:700;color:var(--dark);
+   font-size:clamp(44px,9vw,72px);line-height:1.02;letter-spacing:.5px}
+.subtitle{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:500;
+   color:var(--muted);font-size:clamp(19px,4vw,24px);margin-top:6px}
+.rule{height:0;border-top:2px solid var(--dark);margin:22px 0 4px}
+.rule+.rule{border-top:1px solid var(--line2);margin:0 0 30px}
+.lead{color:var(--qtext);font-size:17px;max-width:640px;margin-bottom:6px}
+.lead b{color:var(--dark)}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;
+  padding:26px 26px 24px;margin:26px 0;box-shadow:0 1px 0 rgba(51,41,29,.04)}
+.card h2{font-family:'Cormorant Garamond',serif;font-weight:700;color:var(--dark);
+  font-size:26px;margin-bottom:4px}
+.card .hint{color:var(--muted);font-size:15px;margin-bottom:18px}
+
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+label{display:block;font-family:'Cormorant Garamond',serif;color:var(--dark);
+  font-size:19px;font-weight:600;margin-bottom:7px}
+label .req{color:var(--rust)}
+input[type=text], textarea{
+  width:100%;background:#fffdf8;border:1px solid var(--line);border-radius:10px;
+  padding:11px 13px;font-family:'Spectral',serif;font-size:16px;color:var(--qtext);
+  resize:vertical;transition:border-color .15s,box-shadow .15s}
+input[type=text]{height:46px}
+textarea{min-height:74px;line-height:1.5}
+input:focus,textarea:focus{outline:none;border-color:var(--rust);
+  box-shadow:0 0 0 3px rgba(176,83,47,.12)}
+input.err,textarea.err{border-color:#c0392b;box-shadow:0 0 0 3px rgba(192,57,43,.12)}
+
+.section-head{display:flex;align-items:baseline;gap:14px;margin:46px 0 8px;
+  padding-bottom:10px;border-bottom:1px solid var(--line)}
+.section-head .rom{font-family:'Cormorant Garamond',serif;font-weight:600;
+  color:var(--rust);font-size:30px;line-height:1}
+.section-head .stitle{font-family:'Cormorant Garamond',serif;font-weight:600;
+  color:var(--dark);font-size:28px;line-height:1}
+
+.q{margin:22px 0}
+.q .qhead{display:flex;gap:12px;align-items:baseline;margin-bottom:8px}
+.q .num{font-family:'Cormorant Garamond',serif;font-weight:700;color:var(--rust);
+  font-size:20px;min-width:26px;text-align:right;flex:none}
+.q .qtext{color:var(--dark);font-size:18px;line-height:1.45}
+.q textarea{margin-left:38px;width:calc(100% - 38px)}
+
+.footer-note{color:var(--muted);font-size:14px;margin-top:34px;line-height:1.6}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:50;
+  background:linear-gradient(180deg,rgba(244,236,219,0) 0%,var(--bg) 34%);
+  padding:26px 20px 20px}
+.bar-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.progress{flex:1;min-width:160px;color:var(--muted);font-size:14px}
+.progress .track{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:6px}
+.progress .fill{height:100%;width:0;background:var(--rust);transition:width .3s}
+button.send{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:21px;
+  background:var(--rust);color:#fff;border:none;border-radius:12px;
+  padding:13px 34px;cursor:pointer;letter-spacing:.3px;transition:transform .1s,background .15s;
+  box-shadow:0 6px 18px rgba(176,83,47,.28)}
+button.send:hover{background:#9a4526}
+button.send:active{transform:translateY(1px)}
+button.send:disabled{background:#c8a58f;cursor:default;box-shadow:none}
+
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);
+  background:var(--dark);color:#f4ecdb;padding:14px 22px;border-radius:12px;font-size:16px;
+  max-width:90vw;text-align:center;opacity:0;pointer-events:none;transition:.3s;z-index:60;
+  box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:#3f6b3f}
+.toast.bad{background:#8f2f24}
+
+.done{display:none;text-align:center;padding:70px 20px}
+.done.show{display:block}
+.done .big{font-family:'Cormorant Garamond',serif;font-size:56px;color:var(--dark);margin-bottom:10px}
+.done p{color:var(--qtext);font-size:18px;max-width:460px;margin:0 auto}
+.saved{color:var(--muted);font-size:13px;text-align:right;margin-top:6px;height:16px;transition:opacity .4s;opacity:0}
+.saved.show{opacity:1}
+@media(max-width:560px){
+  body{padding:0 14px 150px}
+  .card{padding:20px 16px}
+  .q textarea{margin-left:0;width:100%}
+  .q .qhead{margin-bottom:6px}
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="form-root">
+  <header>
+    <h1>Семейный&nbsp;архив</h1>
+    <div class="subtitle">вопросы, которые стоит задать близким</div>
+    <div class="rule"></div><div class="rule"></div>
+    <p class="lead">Здесь можно спокойно, по порядку, ответить на вопросы о жизни, детстве,
+    семье и о том, что важно. <b>Ответы сохраняются автоматически</b> — можно закрыть и вернуться позже.
+    Когда закончите, нажмите кнопку внизу — и ответы придут тому, кто вас об этом попросил.</p>
+  </header>
+
+  <div class="card" id="intro">
+    <h2>Сначала представьтесь</h2>
+    <div class="hint">Чтобы было понятно, чьи это воспоминания.</div>
+    <div class="field">
+      <label>Как вас зовут? <span class="req">*</span></label>
+      <input type="text" id="who-name" placeholder="Например: Валентина Петровна">
+    </div>
+    <div class="field">
+      <label>Кем вы приходитесь?</label>
+      <input type="text" id="who-rel" placeholder="Мама, папа, бабушка, дедушка…">
+    </div>
+  </div>
+
+  <div id="sections"></div>
+
+  <p class="footer-note">Отвечать на все вопросы не обязательно — заполните то, чем захотите поделиться.</p>
+  <div class="saved" id="saved">сохранено</div>
+</div>
+
+<div class="done" id="done">
+  <div class="big">Спасибо ♥</div>
+  <p id="done-text">Ваши ответы отправлены. Их бережно сохранят.</p>
+</div>
+
+<div class="bar" id="bar">
+  <div class="bar-inner">
+    <div class="progress">
+      <span id="pcount">0 из 45 вопросов</span>
+      <div class="track"><div class="fill" id="pfill"></div></div>
+    </div>
+    <button class="send" id="send">Отправить ответы</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ==== настройки телеграма ====
+const TG_TOKEN = "8601641237:AAG0z08y_TJ3TFlb9IFObA9JogL1hW0YO6s";
+const TG_CHAT  = "993176964";
+const STORAGE_KEY = "family-archive-answers-v1";
+
+// ==== данные: разделы и вопросы ====
+const SECTIONS = [
+  ["I","Детство и дом",[
+    "Какое твоё самое первое воспоминание?",
+    "Кто выбрал тебе имя? Были ли другие варианты?",
+    "Как тебя называли дома? Были ли домашние прозвища?",
+    "Где ты родился и вырос? Каким был дом? Кто жил рядом?",
+    "Что из дома детства особенно запомнилось: запахи, звуки, вещи, места?",
+    "Каким ребёнком ты был: спокойным, хулиганистым, упрямым, мечтательным?",
+    "Во что ты любил играть? Какие были любимые игрушки?",
+    "Какие книги, сказки, фильмы или герои были важны для тебя?",
+    "Был ли у тебя лучший друг детства? Что вас связывало?"]],
+  ["II","Взросление",[
+    "Чем ты занимался после школы: кружки, секции, хобби?",
+    "Какие обязанности были у тебя дома?",
+    "Чего ты боялся в детстве и как справлялся?",
+    "Каким достижением из детства ты гордишься?",
+    "Нравилось ли тебе в школе? Какие предметы или учителя запомнились?",
+    "Что в твоём детстве было такого, чего уже нет у сегодняшних детей?",
+    "Как изменился мир с тех пор? В каком времени тебе проще жить — тогда или сейчас?"]],
+  ["III","Родители и корни",[
+    "Какими были твои родители для тебя в детстве и какими ты видишь их сейчас?",
+    "Какие советы родителей оказались правдой и помогли в жизни?",
+    "Что ты помнишь о своих бабушках и дедушках?",
+    "Есть ли семейные истории, которые нельзя потерять?"]],
+  ["IV","Любовь и семья",[
+    "Как ты познакомился со своим партнёром? Что запомнилось в начале отношений?",
+    "Что для тебя значит хорошая семья?",
+    "Как изменилась жизнь с появлением детей?",
+    "Что оказалось самым радостным и самым трудным в родительстве?",
+    "Что бы ты хотел сказать детям, внукам или младшим в семье?"]],
+  ["V","Дело и призвание",[
+    "Кем ты мечтал стать в детстве?",
+    "Как ты выбрал профессию? Что в ней оказалось твоим?",
+    "Какая была первая работа и чему она научила?",
+    "На что ушла первая зарплата или первая важная покупка?"]],
+  ["VI","Характер и ценности",[
+    "В чём твоя сила? В чём слабость?",
+    "Какие качества в людях ты ценишь, а какие не принимаешь?",
+    "На какие принципы ты опираешься в жизни?",
+    "Что для тебя успех и счастье?",
+    "Какие события сильнее всего изменили тебя?",
+    "Когда было трудно и как ты справлялся? Кто тебя поддерживал?",
+    "О чём ты жалеешь? Можно ли это сейчас как-то поправить?"]],
+  ["VII","Смыслы и наследие",[
+    "Какие места, города или страны для тебя особенные?",
+    "Чему ты хотел бы ещё научиться?",
+    "О чём ты мечтал раньше и о чём мечтаешь сейчас?",
+    "Что ты думаешь о возрасте? В каком возрасте тебе было особенно хорошо?",
+    "За что ты благодарен людям и жизни?",
+    "В чём для тебя смысл жизни?",
+    "На что точно не стоит тратить время и здоровье?",
+    "Что самое важное ты хочешь оставить после себя?",
+    "Какой вопрос тебе никто не задал, а ты хотел бы на него ответить?"]]
+];
+
+// ==== построение формы ====
+const flatQuestions = [];
+const sectionsEl = document.getElementById('sections');
+let n = 0;
+SECTIONS.forEach(([rom,title,qs])=>{
+  const head = document.createElement('div');
+  head.className='section-head';
+  head.innerHTML=`<span class="rom">${rom}</span><span class="stitle">${title}</span>`;
+  sectionsEl.appendChild(head);
+  qs.forEach(q=>{
+    n++;
+    const idx = n;
+    const wrap=document.createElement('div');
+    wrap.className='q';
+    wrap.innerHTML=`<div class="qhead"><span class="num">${idx}</span><span class="qtext"></span></div>`;
+    wrap.querySelector('.qtext').textContent=q;
+    const ta=document.createElement('textarea');
+    ta.id='q'+idx;
+    ta.placeholder='Ваш ответ…';
+    ta.rows=2;
+    wrap.appendChild(ta);
+    sectionsEl.appendChild(wrap);
+    flatQuestions.push({idx, q, section:title, rom, el:ta});
+    ta.addEventListener('input', ()=>{autoGrow(ta);scheduleSave();updateProgress();});
+  });
+});
+const TOTAL = flatQuestions.length;
+document.getElementById('pcount').textContent = `0 из ${TOTAL} вопросов`;
+
+function autoGrow(ta){ta.style.height='auto';ta.style.height=(ta.scrollHeight+2)+'px';}
+
+// ==== автосохранение ====
+let saveTimer=null;
+function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(save,500);}
+function save(){
+  const data={name:val('who-name'),rel:val('who-rel'),answers:{}};
+  flatQuestions.forEach(f=>{if(f.el.value.trim())data.answers[f.idx]=f.el.value;});
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(data));showSaved();}catch(e){}
+}
+function showSaved(){const s=document.getElementById('saved');s.classList.add('show');clearTimeout(s._t);s._t=setTimeout(()=>s.classList.remove('show'),1200);}
+function load(){
+  let d;try{d=JSON.parse(localStorage.getItem(STORAGE_KEY));}catch(e){return;}
+  if(!d)return;
+  if(d.name)document.getElementById('who-name').value=d.name;
+  if(d.rel)document.getElementById('who-rel').value=d.rel;
+  if(d.answers)flatQuestions.forEach(f=>{if(d.answers[f.idx]){f.el.value=d.answers[f.idx];autoGrow(f.el);}});
+}
+function val(id){return document.getElementById(id).value.trim();}
+['who-name','who-rel'].forEach(id=>document.getElementById(id).addEventListener('input',scheduleSave));
+
+function updateProgress(){
+  const c=flatQuestions.filter(f=>f.el.value.trim()).length;
+  document.getElementById('pcount').textContent=`${c} из ${TOTAL} вопросов`;
+  document.getElementById('pfill').style.width=(c/TOTAL*100)+'%';
+}
+
+// ==== отправка в телеграм ====
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function buildMessages(){
+  const name=val('who-name'), rel=val('who-rel');
+  const now=new Date().toLocaleString('ru-RU',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const answered=flatQuestions.filter(f=>f.el.value.trim());
+  const head=[`<b>📖 Семейный архив — новые ответы</b>`,
+    `👤 <b>${esc(name)}</b>${rel?' — '+esc(rel):''}`,
+    `🕐 ${esc(now)}`,
+    `✍️ Отвечено: ${answered.length} из ${TOTAL}`].join('\n');
+  // группируем по разделам
+  const blocks=[];
+  SECTIONS.forEach(([rom,title])=>{
+    const list=answered.filter(f=>f.rom===rom);
+    if(!list.length)return;
+    let b=`\n<b>${rom}. ${esc(title)}</b>\n`;
+    list.forEach(f=>{b+=`\n<b>${f.idx}. ${esc(f.q)}</b>\n${esc(f.el.value.trim())}\n`;});
+    blocks.push(b);
+  });
+  // режем на сообщения < 3800 символов
+  const LIMIT=3800;
+  const msgs=[];
+  let cur=head+'\n';
+  blocks.forEach(b=>{
+    if((cur+b).length>LIMIT){msgs.push(cur);cur='';}
+    if(b.length>LIMIT){ // очень длинный блок — режем по строкам
+      b.split('\n').forEach(line=>{
+        if((cur+line+'\n').length>LIMIT){msgs.push(cur);cur='';}
+        cur+=line+'\n';
+      });
+    }else cur+=b;
+  });
+  if(cur.trim())msgs.push(cur);
+  return msgs;
+}
+
+async function sendTelegram(text){
+  const r=await fetch(`https://api.telegram.org/bot${TG_TOKEN}/sendMessage`,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({chat_id:TG_CHAT,text,parse_mode:'HTML',disable_web_page_preview:true})
+  });
+  const j=await r.json();
+  if(!j.ok)throw new Error(j.description||('HTTP '+r.status));
+  return j;
+}
+
+function toast(msg,cls){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+(cls||'');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),4200);}
+
+const sendBtn=document.getElementById('send');
+sendBtn.addEventListener('click', async ()=>{
+  const nameEl=document.getElementById('who-name');
+  if(!nameEl.value.trim()){
+    nameEl.classList.add('err');nameEl.focus();
+    nameEl.scrollIntoView({behavior:'smooth',block:'center'});
+    toast('Пожалуйста, представьтесь — напишите имя','bad');
+    return;
+  }
+  nameEl.classList.remove('err');
+  const answered=flatQuestions.filter(f=>f.el.value.trim());
+  if(!answered.length){toast('Ответьте хотя бы на один вопрос','bad');return;}
+
+  sendBtn.disabled=true;const orig=sendBtn.textContent;sendBtn.textContent='Отправляю…';
+  try{
+    const msgs=buildMessages();
+    for(let i=0;i<msgs.length;i++){
+      sendBtn.textContent=msgs.length>1?`Отправляю… ${i+1}/${msgs.length}`:'Отправляю…';
+      await sendTelegram(msgs[i]);
+    }
+    document.getElementById('form-root').style.display='none';
+    document.getElementById('bar').style.display='none';
+    document.getElementById('done').classList.add('show');
+    window.scrollTo(0,0);
+  }catch(e){
+    sendBtn.disabled=false;sendBtn.textContent=orig;
+    let m='Не удалось отправить: '+e.message;
+    if(/chat not found/i.test(e.message))
+      m='Похоже, получатель ещё не запустил бота. Ответы сохранены — попробуйте позже.';
+    toast(m,'bad');
+    console.error(e);
+  }
+});
+
+// ==== старт ====
+load();updateProgress();
+window.addEventListener('beforeunload',save);
+</script>
+</body>
+</html>
